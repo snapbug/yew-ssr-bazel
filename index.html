@@ -1,9 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Yew SSR Example</title>
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="utf-8">
+    <title>Bazel Built Yew SSR Example</title>
 
-    <link data-trunk rel="rust" data-bin="simple_ssr_hydrate" data-cargo-features="hydration" />
-  </head>
-</html>
+    <script type="module">
+	import init from '/simple_ssr_wasm.js';
+	init('/simple_ssr_wasm_bg.wasm');
+	</script>
+  
+<link rel="preload" href="/simple_ssr_wasm_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
+<link rel="modulepreload" href="/simple_ssr_wasm.js"></head>
+<body>
+</body></html>

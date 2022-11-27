@@ -53,6 +53,6 @@ async fn main() {
 
     let routes = html.or(warp::fs::dir(opts.dir));
 
-    println!("You can view the website at: http://localhost:8080/");
-    warp::serve(routes).run(([127, 0, 0, 1], 8080)).await;
+    println!("You can view the website at: http://localhost:8081/");
+    warp::serve(routes).run(([127, 0, 0, 1], 8081)).await;
 }
