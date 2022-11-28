@@ -9,7 +9,7 @@ def cargo_dependencies():
             "yew": crate.spec(version = "0.20.0", features = ["ssr", "hydration"]),
 			"reqwest": crate.spec(version = "0.11.8", features = ["json"]),
             "serde": crate.spec(version = "1.0.132", features = ["derive"]),
-            "uuid": crate.spec(version = "1.0.0", features = ["serde", "js"]),
+            "uuid": crate.spec(version = "1.0.0", features = ["serde"]),
             "futures": crate.spec(version = "0.3"),
             "bytes": crate.spec(version = "1.0"),
 
