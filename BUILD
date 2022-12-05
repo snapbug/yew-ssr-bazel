@@ -4,9 +4,10 @@ load("@rules_rust//wasm_bindgen:wasm_bindgen.bzl", "rust_wasm_bindgen")
 package(default_visibility = ["//visibility:public"])
 
 config_setting(
-	name = "wasm_build",
+	name = "is_rust_wasm",
 	constraint_values = [
 		"@platforms//cpu:wasm32",
+		"@rules_rust//rust/platform/os:unknown",
 	],
 )
 
@@ -20,22 +21,26 @@ rust_library(
         "@crates//:serde",
         "@crates//:uuid",
 	] + select({
-		":wasm_build": [
-		],
-		"//conditions:default": [
-			"@crates//:reqwest",
-		],
-	}),
+			":is_rust_wasm": [
+			],
+			"//conditions:default": [
+				"@crates//:reqwest",
+			],
+		},
+		no_match_error = "not wasm",
+	),
 	crate_features = [] + select({
-		":wasm_build": [
-			"hydration",
-			"yew/hydration",
-		],
-		"//conditions:default": [
-			"ssr",
-			"yew/ssr",
-		],
-	}),
+			":is_rust_wasm": [
+				"hydration",
+				"yew/hydration",
+			],
+			"//conditions:default": [
+				"ssr",
+				"yew/ssr",
+			],
+		},
+		no_match_error = "not wasm?",
+	),
 )
 
 rust_binary(
@@ -55,6 +60,7 @@ rust_binary(
 	],
 	crate_features = [
 		"ssr",
+		"yew/ssr",
 	],
 )
 
@@ -73,6 +79,7 @@ rust_binary(
 	],
 	crate_features = [
 		"hydration",
+		"yew/hydration",
 	],
 )
 
