@@ -8,11 +8,20 @@ trunk build index.html
 
 First, I inspected what commands `trunk build` actually runs, by cloning and editing that repository. It runs
 ```shell
-cargo build --target=wasm32-unknown-unknown --manifest-path /Users/mcrane/tmp/yew-bazel/Cargo.toml --bin simple_ssr_hydrate --features hydration
+cargo build \
+        --target=wasm32-unknown-unknown \
+        --manifest-path /Users/mcrane/tmp/yew-bazel/Cargo.toml \
+        --bin simple_ssr_hydrate \
+        --features hydration
 ```
 to build the binary, and then invokves wasm-bindgen
 ```shell
-wasm-bindgen --target=web --out-dir=/Users/mcrane/tmp/yew-bazel/target/wasm-bindgen/debug --out-name=simple_ssr_hydrate-1b6f311a7f3e394a /Users/mcrane/tmp/yew-bazel/target/wasm32-unknown-unknown/debug/simple_ssr_hydrate.wasm --no-typescript
+/Users/mcrane/Library/Caches/dev.trunkrs.trunk/wasm-bindgen-0.2.83/wasm-bindgen \
+        --target=web \
+        --out-dir=/Users/mcrane/tmp/yew-bazel/target/wasm-bindgen/debug \
+        --out-name=simple_ssr_hydrate-1b6f311a7f3e394a \
+        /Users/mcrane/tmp/yew-bazel/target/wasm32-unknown-unknown/debug/simple_ssr_hydrate.wasm \
+        --no-typescript
 ```
 
 This works, and doesn't complain about missing functions, packages, etc.
