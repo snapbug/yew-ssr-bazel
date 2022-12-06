@@ -44,7 +44,7 @@ rust_binary(
         "@crates//:yew",
     ],
     crate_features = [
-        "simple_ssr/ssr",
+		"simple_ssr/ssr",
         "yew/ssr",
     ],
 )
@@ -63,7 +63,7 @@ rust_binary(
         "@crates//:log",
     ],
     crate_features = [
-        "simple_ssr/hydration",
+		"simple_ssr/hydration",
         "yew/hydration",
     ],
 )
