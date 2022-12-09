@@ -18,12 +18,24 @@ rust_library(
     ],
     deps = [
         "@crates//:yew",
+        "@crates//:yew-router",
         "@crates//:serde",
         "@crates//:uuid",
     ] + select({
         ":is_rust_wasm": [],
         "//conditions:default": [
             "@crates//:reqwest",
+        ],
+    }),
+    crate_features = [
+    ] + select({
+        ":is_rust_wasm": [
+            "hydration",
+            "yew/hydration",
+        ],
+        "//conditions:default": [
+            "ssr",
+            "yew/ssr",
         ],
     }),
 )
@@ -35,17 +47,16 @@ rust_binary(
     ],
     deps = [
         ":simple_ssr",
-
+        "@crates//:yew",
+        "@crates//:axum",
+        "@crates//:tower",
+        "@crates//:tower-http",
+        "@crates//:hyper",
+        "@crates//:futures",
+        "@crates//:bytes",
         "@crates//:tokio",
         "@crates//:warp",
         "@crates//:clap",
-        "@crates//:futures",
-        "@crates//:bytes",
-        "@crates//:yew",
-    ],
-    crate_features = [
-		"simple_ssr/ssr",
-        "yew/ssr",
     ],
 )
 
@@ -61,10 +72,6 @@ rust_binary(
         "@crates//:wasm-bindgen-futures",
         "@crates//:wasm-logger",
         "@crates//:log",
-    ],
-    crate_features = [
-		"simple_ssr/hydration",
-        "yew/hydration",
     ],
 )
 

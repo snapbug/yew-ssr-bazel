@@ -1,13 +1,23 @@
-use std::error::Error;
+use std::collections::HashMap;
+use std::convert::Infallible;
 use std::path::PathBuf;
 
-use bytes::Bytes;
+use axum::body::{Body, StreamBody};
+use axum::error_handling::HandleError;
+use axum::extract::Query;
+use axum::handler::Handler;
+use axum::http::{Request, StatusCode};
+use axum::response::IntoResponse;
+use axum::routing::get;
+use axum::{Extension, Router};
 use clap::Parser;
-use futures::stream::{self, Stream, StreamExt};
-use simple_ssr::App;
-use warp::Filter;
+use futures::stream::{self, StreamExt};
+use hyper::server::Server;
+use tower::ServiceExt;
+use tower_http::services::ServeDir;
+use yew::ServerRenderer;
 
-type BoxedError = Box<dyn Error + Send + Sync + 'static>;
+use simple_ssr::{ServerApp, ServerAppProps};
 
 /// A basic example
 #[derive(Parser, Debug)]
@@ -18,16 +28,22 @@ struct Opt {
 }
 
 async fn render(
-    index_html_before: String,
-    index_html_after: String,
-) -> Box<dyn Stream<Item = Result<Bytes, BoxedError>> + Send> {
-    let renderer = yew::ServerRenderer::<App>::new();
+    Extension((index_html_before, index_html_after)): Extension<(String, String)>,
+    url: Request<Body>,
+    Query(queries): Query<HashMap<String, String>>,
+) -> impl IntoResponse {
+    let url = url.uri().to_string();
 
-    Box::new(
+    let renderer = ServerRenderer::<ServerApp>::with_props(move || ServerAppProps {
+        url: url.into(),
+        queries,
+    });
+
+    StreamBody::new(
         stream::once(async move { index_html_before })
             .chain(renderer.render_stream())
             .chain(stream::once(async move { index_html_after }))
-            .map(|m| Result::<_, BoxedError>::Ok(m.into())),
+            .map(Result::<_, Infallible>::Ok),
     )
 }
 
@@ -44,15 +60,33 @@ async fn main() {
     index_html_before.push_str("<body>");
     let index_html_after = index_html_after.to_owned();
 
-    let html = warp::path::end().then(move || {
-        let index_html_before = index_html_before.clone();
-        let index_html_after = index_html_after.clone();
+    let handle_error = |e| async move {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("error occurred: {}", e),
+        )
+    };
 
-        async move { warp::reply::html(render(index_html_before, index_html_after).await) }
-    });
-
-    let routes = html.or(warp::fs::dir(opts.dir));
+    let app = Router::new()
+        .route("/api/test", get(|| async move { "Hello World" }))
+        .fallback(HandleError::new(
+            ServeDir::new(opts.dir)
+                .append_index_html_on_directories(false)
+                .fallback(
+                    render
+                        .layer(Extension((
+                            index_html_before.clone(),
+                            index_html_after.clone(),
+                        )))
+                        .into_service()
+                        .map_err(|err| -> std::io::Error { match err {} }),
+                ),
+            handle_error,
+        ));
 
     println!("You can view the website at: http://localhost:8081/");
-    warp::serve(routes).run(([127, 0, 0, 1], 8081)).await;
+    Server::bind(&"127.0.0.1:8081".parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }

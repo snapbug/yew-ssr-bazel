@@ -14,6 +14,7 @@ required-features = ["ssr"]
 
 [dependencies]
 yew = "0.20.0"
+yew-router = "0.17.0"
 serde = { version = "1.0.148", features = ["derive"] }
 uuid = { version = "1.2.2", features = ["serde"] }
 
@@ -23,9 +24,13 @@ wasm-logger = "0.2.0"
 log = "0.4.17"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+axum = "0.5"
+futures = "0.3.25"
+tower = { version = "0.4", features = ["make"] }
+tower-http = { version = "0.3", features = ["fs"] }
+hyper = { version = "0.14", features = ["server", "http1"] }
 reqwest = { version = "0.11.13", features = ["json"] }
 tokio = { version = "1.22.0", features = ["full"] }
-warp = "0.3.3"
 clap = { version = "3.2.23", features = ["derive"] }
 
 [features]
