@@ -18,4 +18,4 @@ This builds static artifacts that will be served and places them in `simple_ssr/
 
 3. Open Browser
 
-Navigate to http://localhost:8080/ to view results.
+Navigate to http://localhost:8081/ to view results.
